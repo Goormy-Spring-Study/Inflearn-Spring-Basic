@@ -93,7 +93,7 @@ class UserService {
    - 인터페이스를 통해 간접적으로 구현 클래스에 접근
    - 결합이 약해지고, 유연한 확장이 가능한 장점이 있음
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240825230437943.png" alt="image-20240825230437943" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240825230437943.png" alt="image-20240825230437943" style="zoom:50%;" />
 
 3. 한 인터페이스를 이용하는 구현 클래스를 두개로 구성하여, 트랜잭션과 비즈니스를 구분한 구조
    - 한 인터페이스에서 두 개의 구현 클래스를 이용
@@ -101,7 +101,7 @@ class UserService {
      - 하지만 한 번에 두개를 동시에 사용할 수도 있음 -> 지금 구성하려는 방식
    - 트랜잭션의 책임을 가지는 클래스와 비즈니스 로직을 가지는 클래스를 구성
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240825230446623.png" alt="image-20240825230446623" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240825230446623.png" alt="image-20240825230446623" style="zoom:50%;" />
 
 ``` java
 // 다음의 인터페이스를 구성
@@ -174,9 +174,9 @@ public class UserServiceTx implements UserService {
 
   -> Client가 실행하는 userService를 호출할 때 UserServiceTx가 실행되어야함
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240825232910107.png" alt="image-20240825232910107" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240825232910107.png" alt="image-20240825232910107" style="zoom:50%;" />
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240825233515892.png" alt="image-20240825233515892" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240825233515892.png" alt="image-20240825233515892" style="zoom:50%;" />
 
 - UserServiceTx에서 사용하는 userService를 userServiceImpl로 구성
 - 스프링 어노테이션으로 빈 이름을 설정할 수도 있음
@@ -228,9 +228,9 @@ public class UserServiceTx implements UserService {
 - 핵심기능(타깃)과 같은 인터페이스를 구현한 부가기능임
 - 프록시가 핵심기능을 제어할 수 있는 위치에 존재함
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827010729812.png" alt="image-20240827010729812" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827010729812.png" alt="image-20240827010729812" style="zoom:50%;" />
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827010807812.png" alt="image-20240827010807812" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827010807812.png" alt="image-20240827010807812" style="zoom:50%;" />
 
 #### 사용목적
 
@@ -257,8 +257,8 @@ public class UserServiceTx implements UserService {
 - 프록시가 여러개여도 되며, 직접 타깃을 사용하도록 고정하지 않아도 됨
 - 여러개의 프록시가 존재하면 순서를 정해서 단계적으로 위임하는 구조로 생성하면 됨
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827011036531.png" alt="image-20240827011036531" style="zoom:50%;" />
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827013729420.png" alt="image-20240827013729420" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827011036531.png" alt="image-20240827011036531" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827013729420.png" alt="image-20240827013729420" style="zoom:50%;" />
 
 > **기능의 부가를 담당하는 프록시인지(데코레이터 패턴), 접근의 제어를 담당하는 프록시인지(프록시 패턴)**
 
@@ -346,7 +346,7 @@ Hello proxeHello = (Hello)Proxy.newProxtInstance(
 );
 ```
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827022002655.png" alt="image-20240827022002655" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827022002655.png" alt="image-20240827022002655" style="zoom:50%;" />
 
 ##### 다이내믹 프록시 확장
 
@@ -501,7 +501,7 @@ public class MessateFactoryBean implements FactoryBean<Message>{
 }
 ```
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827031901679.png" alt="image-20240827031901679" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827031901679.png" alt="image-20240827031901679" style="zoom:50%;" />
 
 ### 6.3.5 프록시 팩토리 빈 방식의 장점과 한계
 

@@ -13,7 +13,7 @@
 
 ### Proxy의 역할
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827010729812.png" alt="image-20240827010729812" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827010729812.png" alt="image-20240827010729812" style="zoom:50%;" />
 
 1. 접근의 제어 (권한 관리, 흐름 관리) - 프록시 패턴
 2. 부가 기능 (로그, 트랜잭션) - 데코레이터 패턴
@@ -61,7 +61,7 @@ ProxyFactoryBean에서 인터페이스의 유무를 확인하여 어떤 프록�
 2. Proxy 객체에 InvocationHandler를 포함해서 하나의 객체로 반환
    - InvocationHandler - 부가기능을 작성하는 부분, 중복되는 코드를 줄일 수 있음
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20AOP,%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%85%E1%85%A7%E1%86%AB.assets/image-20240827022002655.png" alt="image-20240827022002655" style="zoom:50%;" />
+<img src="./2주차 AOP, 프록시 관련.assets/image-20240827022002655.png" alt="image-20240827022002655" style="zoom:50%;" />
 
 #### 2. CGLib Proxy
 
@@ -120,4 +120,4 @@ public ResponseDto create(RequestDto request) throws SQLException {
 
 
 
-<img src="./2%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1%20JPA%20Transaction.assets/image-20240827142646955.png" alt="image-20240827142646955" style="zoom:50%;" />
+<img src="./2주차 JPA Transaction.assets/image-20240827142646955.png" alt="image-20240827142646955" style="zoom:50%;" />
