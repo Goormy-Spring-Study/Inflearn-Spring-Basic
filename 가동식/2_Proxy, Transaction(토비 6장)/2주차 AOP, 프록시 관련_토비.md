@@ -507,6 +507,8 @@ public class MessateFactoryBean implements FactoryBean<Message>{
 
 - 코드의 수정 없이도 다양한 클래스에 적용할 수 있음
 
+- 다이내믹 프록시 + 팩토리 빈을 이용한 DI까지 하면 다이내믹 프록시 생성 코드도 제거 가능
+
 - 하나의 클래스 안에 존재하는 여러개의 메소드에 부가기능을 한번에 제공하는 것이 가능
 - 하지만 한번에 여러개의 클래스에 공통적인 부가기능을 제공하는 방법은 불가능
 
@@ -522,7 +524,79 @@ public class MessateFactoryBean implements FactoryBean<Message>{
 
 ### 6.4.1 ProxyFactoryBean
 
+- 스프링에서는 일관된 방법으로 프록시를 만들 수 있게 도와주는 추상 레이어를 제공함
+- 생성된 프록시는 스프링의 빈으로 등록되어있어야 함
+- 스프링에서는 프록시 오브젝트를 생성해주는 기술을 추상화한 팩토리빈을 제공해줌
 
+#### ProxyFactoryBean
+
+- 프록시를 생성해서 빈 오브젝트로 등록하게 해주는 팩토리 빈
+- 순수하게 프록시를 생성하는 작업만을 담당하며, 프록시를 통해 제공하는 부가기능은 별도의 빈에 둘 수 있음
+- ProxyFactoryBean이 생성하는 프록시에서 사용할 부가기능은  MethodInterceptor 인터페이스를 구현
+
+##### MethodInterceptor
+
+- invoke() 메소드가 ProxyFactoryBean으로부터 타깃 오브젝트에 대한 정보까지 함께 제공받음
+- 타깃이 다른 여러 프록시에서 함께 사용할 수 있고, 싱글톤 빈으로 등록이 가능함
+
+##### InvocationHandler
+
+- invoke() 메소드는 타깃 오브젝트에 대한 정보를 제공하지 않음
+
+#### 다이내믹 프록시와의 차이점
+
+- MethodInterceptor에는 메소드 정보와 함께 타깃 오브젝트가 담긴 MethodInvocation 오브젝트가 전달됨
+  - MethodInvocation은 타깃 오브젝트의 메소드를 실행하는 기능을 가짐
+  - MethodInterceptor는 부가기능을 제공하는데에만 집중할 수 있음
+- 수정자 메소드를 사용하는 것 대신 addAdvice()라는 메소드를 사용 MethodInterceptor를 설정함
+  - ProxyFactoryBean에는 여러개의  MethodInterceptor를 추가할 수 있음
+  - 1개의 ProxyFactoryBean으로 여러개의 부가기능을 제공할 수 있음
+- 기본적으로 JDK가 제공하는 다이내믹 프록시를 만들어줌
+
+#### 부가기능 적용 대상 메소드 선정 방법
+
+- MethodInterceptor 오브젝트는 타깃 정보를 가지고 있지 않음
+- 여러 프록시가 공유하기 때문에 MethodInterceptor에 특정 프록시에만 적용되는 기능을 넣으면 안됨
+
+##### 어드바이스
+
+- 부가기능을 제공하는 오브젝트
+
+##### 포인트컷
+
+- 메소드 선정 알고리즘을 담은 오브젝트
+
+이 두가지는 모두 프록시에  DI로 주입되어 사용됨
+
+##### 적용 대상 선정방법
+
+1. 프록시가 클라이언트로 요청을 받음
+2. 포인트컷에서 부가기능을 부여할 메소드인지 확인
+3. 맞다면 MethodIntercpetor 타입의 어드바이스를 호출
+
+``` java
+@Test
+public void pointcutAdvisor(){
+	ProxyFactoryBean pfBean = new ProxyFactoryBean();
+	pfBean.setTarget(new HelloTarget());
+	
+	NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut(); // 포인트컷
+	pointcut.setMappedName("sayH*"); //sayH로 시작하는 모든 메소드가 대상이 됨
+	
+	pfBean.addAdvisor(new DefaultPointcutAdvisor(pointsut,new UppercaseAdvice()));
+	//포인트컷과 어드바이스를 Advisor로 묶어서 한번에 추가 
+	Hello proxideHello = (Hello)pfBean.getObject();
+	
+	assertThat(proxiedHello.sayHello("Toby"),is("HELLO TOBY"));
+	assertThat(proxiedHello.sayHI("Toby"),is("HI TOBY"));
+	assertThat(proxiedHello.sayThankYou("Toby"),is("Thank You TOBY"));
+	//조건에 부합하지 않으므로 대문자변환이 되지 않음
+}
+```
+
+<img src="./assets/image-20240828164112945.png" alt="image-20240828164112945" style="zoom:50%;" />
+
+<img src="./assets/image-20240828164132031.png" alt="image-20240828164132031" style="zoom:50%;" />
 
 ### 6.4.2 ProxyFactoryBean 적용
 
@@ -530,21 +604,43 @@ public class MessateFactoryBean implements FactoryBean<Message>{
 
 ## 6.5 스프링 AOP
 
+- 부가기능의 적용이 필요한 타깃 오브젝트마다 비슷한 ProxyFactoryBean 빈 설정정보를 추가하는 부분을 진행해야함
+- 설정은 매번 복사해서 붙이고 타겟 프로퍼티 내용을 수정해야함
+
 ### 6.5.1 자동 프록시 생성
 
-
+- BeanPostProcessor 인터페이스를 구현해서 빈 후처리기를 구현할 수 있음
+- 빈 후처리기는 스프링 빈 오브젝트로 만들어진 후, 빈 오브젝트를 다시 가공할 수 있게 해줌
 
 ### 6.5.2 DefaultAdvisorAutoProxyCreator의 적용
 
+- DefaultAdvisorAutoProxyCreator는 어드바이저를 이용한 자동 프록시 생성기임 (빈 후처리기 중 하나)
+- 빈 후처리기를 스프링에 적용하는 방법은 해당 후처리기 차제를 빈으로 등록하는 것
+  - 빈 오브젝트가 생성될 때마다 빈 후처리기에 보내서 후처리 작업을 요청함
 
+1. 빈 후처리기가 등록되어있으면 스프링에서 빈 오브젝트를 만들 때마다 후처리기에 해당 빈을 보냄
+2. 빈에 등록된 모든 어드바이저 내의 포인트컷으로 전달받은 빈이 프록시 적용 대상인지 확인
+3. 맞다면 내장된 프록시 생성기에게 현재 빈에 대한 프록시를 만들게 하고, 어드바이저를 프록시에 연결
+4. 프록시가 생성되면 빈 후처리기는 전달받은 빈 오브젝트 대신 프록시 오브젝트를 컨테이너에 반환
+5. 컨테이너는 최종적으로 빈 후처리기가 반환한 오브젝트(프록시 오브젝트)를 빈으로 등록하고 사용
 
 ### 6.5.3 포인트컷 표현식을 이용한 포인트컷
 
+- 메소드의 이름과 클래스의 이름 패턴을 각각 클래스 필터와 메소드 매처 오브젝트로 비교해서 선정
+  - 하나씩 클래스 필터와 메소드 매처를 구현하거나 스프링이 제공하는 것을 가져와 프로퍼티를 설정해야함
+- 포인트컷 표현식으로 포인트컷의 클래스와 메소드를 선정하는 알고리즘을 작성할 수 있음
+  - AspectJ 포인트컷 표현식이라고도 함 (AspectJ에서 가져와서 일부를 확장해서 사용)
+- execution - 메소드 실행 조인 포인트 지정
+- within - 특정 타입 내 조인 포인트 매칭
+- args - 인자가 주어진 타입의 인스턴스인 조인 포인트
+- 등등...
 
+<img src="./assets/image-20240829011228545.png" alt="image-20240829011228545" style="zoom:50%;" />
 
 ### 6.5.4 AOP란 무엇인가?
 
-
+- Aspect Oriented Programming - AOP
+- 애플리케이션의 핵심적인 기능에서 부가적인 기능을 분리해서 Aspect라는 모듈로 만들어서 설계
 
 ### 6.5.5 AOP 적용기술
 
@@ -552,7 +648,22 @@ public class MessateFactoryBean implements FactoryBean<Message>{
 
 ### 6.5.6 AOP의 용어
 
-
+- 타깃 - 부가기능을 부여할 대상
+- 어드바이스 - 타깃에세 제공할 부가기능을 담은 모듈
+  - 메소드 호출 과정에 전반적으로 참여하는 것도 있고, 일부 과정에서만 동작하는 것도 있음
+- 조인포인트 - 어드바이스가 적용될 수 있는 위치
+  - AOP에서 조인 포인트는 메소드의 실행 단계임
+- 포인트컷 - 어드바이스를 적용할 조인 포인트를 선별하는 작업 또는 그 기능을 정의한 모듈
+- 프록시 - 클라이언트와 타깃 사이에서 부가기능을 제공하는 오브젝트
+- 어드바이저 - 포인트컷과 어드바이스를 하나씩 가지고 있는 오브젝트
+  - 스프링 AOP에서만 사용되는 용어
+- 애스팩트 - AOP의 기본 모듈, 스프링의 어드바이저는 아주 단순한 애스팩트
 
 ### 6.5.7 AOP 네임스페이스
 
+- 스프링의 프록시 방식 AOP를 적용하려면 최소한 네 가지 빈을 등록해야함
+
+1. 자동 프록시 생성기 - 빈으로 등록된 어드바이저로 프록시를 자동 생성하는 기능을 담당함
+2. 어드바이스 - 부가기능을 구현한 클래스를 빈으로 등록
+3. 포인트컷 - AspectJExpressionPointcut을 빈으로 등록하고 expression 프로퍼티에 표현식을 넣으면 됨
+4. 어드바이저 - DefaultPointcutAdvisor 클래스를 빈으로 등록해서 사용ㅇ
